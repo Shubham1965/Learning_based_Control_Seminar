@@ -32,7 +32,7 @@ You have to hand in a six-page review paper that contains:
 
 Assigned Paper:
 1. **Title**: Mastering the game of Go with deep neural networks and tree search
-2. **Author**: **D. Silver et al**.
+2. **Authors**: **D. Silver et al**.
 3. **Keywords**: Deep Reinforcement Learning
 4. **Link**: https://www.nature.com/articles/nature16961.pdf
 5. **Supervisor**: Friedrich Solowjow
