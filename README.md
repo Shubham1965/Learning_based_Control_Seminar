@@ -29,17 +29,17 @@ You have to hand in a six-page review paper that contains:
 5. The paper should be written using LATEX.
 
 Assigned Paper:
-Title: Mastering the game of Go with deep neural networks and tree search
--- Author: D. Silver et al.
---  Keywords: RL
---  Link: https://www.nature.com/articles/nature16961.pdf
---  Supervisor: Friedrich Solowjow
---  Synopsis: This paper is about the famous DeepMind work on mastering Go On
+1.**Title**: Mastering the game of Go with deep neural networks and tree search
+2.**Author**: **D. Silver et al**.
+3.** Keywords**: Deep Reinforcement Learning
+4.**Link**: https://www.nature.com/articles/nature16961.pdf
+5.**Supervisor**: Friedrich Solowjow
+6.**Synopsis**: This paper is about the famous DeepMind work on mastering Go On
 this paper we want to focus on the general idea of RL in combination with
 presenting the difficulties of the use case problem and some student chosen details
 We expect that the student to present the problem, the high level idea, and
 some in depth details
 
 Contents of the repo:
--- LaTeX pdf of my review paper.
--- Compressed LaTeX folder.
+1.**LaTeX pdf of my review paper.**
+2. **Compressed LaTeX folder.**
