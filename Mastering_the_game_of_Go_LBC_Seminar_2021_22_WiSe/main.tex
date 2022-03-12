@@ -1,0 +1,191 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+%Added 
+\graphicspath{ {./images/} }
+\usepackage{stfloats}
+\usepackage[all]{nowidow} \setnoclub
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{AlphaGo: an Atypical Go program}
+
+% \author{\IEEEauthorblockN{1\textsuperscript{st} Given Name Surname}
+% \IEEEauthorblockA{\textit{dept. name of organization (of Aff.)} \\
+% \textit{name of organization (of Aff.)}\\
+% City, Country \\
+% email address or ORCID}
+% }
+
+\author{\IEEEauthorblockN{Shubham Kamble}
+\IEEEauthorblockA{
+% \textit{Institut für Data Science im Maschinenbau} \\
+\textit{Rheinisch-Westfälische Technische Hochschule Aachen}\\
+Aachen, Germany \\
+shubham.kamble@rwth-aachen.de}
+}
+
+% {}^2 \textit{Intelligent Control Systems Group, Max Planck Institute for Intelligent Systems, solowjow@is.mpg.de}
+% \textsuperscript{1},
+% Friedrich Solowjow\textsuperscript{2}
+
+\maketitle
+
+\begin{abstract}
+The game of Go has challenged artificial intelligence researchers for many decades. One of the reasons is its enormous search space, which makes it challenging to find the optimal policy. Additionally, there are only few heuristics to evaluate a board position (to determine who is winning). Thus, rewards become sparse. However, a new paradigm for search, based on Monte-Carlo simulation combined with deep convolutional neural networks, has revolutionized the state-of-the-art. Nowadays, they can play at human-master levels and win in time-control games. Here, we discuss this search approach that uses `policy networks' to select moves and `value networks' to evaluate board positions trained using a reinforcement learning framework. Further, an asynchronous policy and value Monte Carlo tree search algorithm combines these networks that initially achieved a playing strength sufficient to defeat the best human players. Finally, the analysis of this new search approach has unraveled new AI techniques for general computer game-playing.
+\end{abstract}
+
+\begin{IEEEkeywords}
+artificial intelligence, Monte Carlo simulation, deep reinforcement learning, computer Go
+\end{IEEEkeywords}
+
+\section{Introduction}
+\input{sections/introduction}
+
+
+\section{Background}
+This section outlines the background theory of the game of Go, deep reinforcement learning, and Monte Carlo tree-search.
+
+\subsection{Game of Go}
+\input{sections/background/game_of_go}
+
+\subsection{Deep Reinforcement Learning} \label{GT}
+\input{sections/background/deep_reinforcement_learning}
+
+
+
+\subsection{Monte Carlo tree-search} \label{MCTS_basic}
+\input{sections/background/MCTS}
+
+
+\section{AlphaGO} \label{AlphaGo}
+This section describes the main innovation that made AlphaGo a strong Go player. First, it builds an offline knowledge representation of the game of Go using DCNNs trained through several steps of its machine learning pipeline (cf. Fig~\ref{ML_pipe_1}). Second, it efficiently combines these networks with asynchronous policy and value MCTS (APV-MCTS) to select final moves during real-time plays. 
+
+
+\subsection{Supervised learning of policy network}
+\input{sections/AlphaGo/SLPolicyNet}
+
+
+\subsection{Rollout policy network}
+Although the largest SL policy networks achieved the highest accuracy, a faster policy network was needed to simulate the games of self-play. Hence, a rollout policy, $p_\pi$, which uses a more simple linear softmax classifier on small pattern features, was developed (Extended Table 4 in \cite{b12}). It takes 2$\mu$s to compute each move instead of the 3ms with the SL policy network. This rollout policy has an accuracy of 24.2\% (compared to 55.7\%), but it is 1500 times faster. 
+
+
+\subsection{Reinforcement learning of policy network} \label{RL_pn}
+\input{sections/AlphaGo/RLPolicyNet}
+
+
+\subsection{Reinforcement learning of value network}
+\input{sections/AlphaGo/RLValueNet}
+
+\subsection{APV-MCTS search algorithm}\label{MCTS}
+\input{sections/AlphaGo/APV_MCTS}
+
+
+\section{Evaluation and analysis of AlphaGo}
+This section describes how AlphaGo was evaluated with existing computer Go programs and human players. Further, it analyses the extent to which this new search technique has been applied in general computer game-playing.
+
+\subsection{Against other Go programs and expert human Go players}
+\input{sections/Evaluation and analysis of AlphaGo/Against other Go programs and expert human Go players}
+
+\subsection{AlphaGo family}
+\input{sections/Evaluation and analysis of AlphaGo/AlphaGo_Family}
+ 
+\section{Conclusion and Outlook}
+The game of Go epitomizes the challenges faced by many real-time sequential decision-making problems: an intractable search space, a significant branching factor, delayed consequences of actions, and a complex optimal solution infeasible to approximate using a policy or value function directly. MCTS is applied for planning in this challenging domain, which has proven to have implications well beyond the two-player games; for example, general game-playing, classical planning, partially observed planning, scheduling, and constraint satisfaction\cite{b11}. By combining MCTS with deep RL, AlphaGo took up the slack just when development in computer Go was thought to be stalled (cf. Fig.~\ref{Prog_comp_go}). It led to a spectacular performance taking us beyond amateur dan into the professional regime and ultimately beyond human capabilities. Research in further versions of AlphaGo has led to MuZero that needs no domain knowledge, no rules, and no human data. While in its early days, the ideas behind MuZero's robust planning and model-learning algorithms may pave the way towards tackling messy real-world RL problems where the “rules of the game” are unknown. 
+% Moreover, this level of sophistication has helped us build confidence that such learning-based AI can be used as a positive multiplier for human ingenuity. 
+
+
+\section*{Acknowledgment}
+I gratefully acknowledge Dr.\ David Silver for sharing his presentation based on his paper ``Combining online and offline knowledge in UCT'' which received the Test of Time Award at ICML 2017 for my reference.
+
+
+\begin{thebibliography}{}
+
+\bibitem{b1} Silver, D., ``Reinforcement Learning and Simulation-Based Search in Computer Go,'' PhD thesis, Dept. of Computing Science, Univ. Alberta, Edmonton, Alberta, 2009.
+
+\bibitem{b2} Sutton, R. \& Barto, A., ``Reinforcement Learning: an Introduction,'' MIT Press, 2018.
+
+\bibitem{b3} Schaeffer, J., ``The game computers (and people) play,'' Advances in Computers, Volume 52, 189–266, 2000.
+
+\bibitem{b4} Allis, L. V., ``Searching for Solutions in Games and Artificial Intelligence,'' PhD thesis,
+Univ. Limburg, Maastricht, The Netherlands, 1994.
+
+\bibitem{b5} Campbell, M., Hoane, A. \& Hsu, F., ``Deep Blue,'' Artificial Intelligence, Volume 134, 57–83, 2002.
+
+\bibitem{b6} Schaeffer, J. et al., ''A world championship caliber checkers program,'' Artificial Intelligence, Volume 53, 273–289, 1992.
+
+\bibitem{b7} Buro, M., ``From simple features to sophisticated evaluation functions,'' Computers and Games, Volume 1, 126–145, 1999.
+
+\bibitem{b8} Tesauro, G., ``TD-gammon, a self-teaching backgammon program, achieves master-level play,'' Neural Computation, Volume 6, 215–219, 1994.
+
+\bibitem{b9} Knuth, D. E. \& Moore, R. W., ``An analysis of alpha-beta pruning,'' Artificial Intelligence, Volume 6, 293–326, 1975. 
+
+\bibitem{b10} Müller, M., ``Position evaluation in computer go,'' International Computer Games Association, Volume 25, 219-228, 2002.
+
+\bibitem{b11} Gelly, S. et al., ``The grand challenge of computer Go: Monte Carlo tree search and extensions,'' Communications of the ACM, Volume 55, 106–113, 2012.
+
+\bibitem{b12} Silver, D., Huang, A., Maddison, C. et al., ``Mastering the game of Go with deep neural networks and tree search,'' Nature, Volume 529, 484–489, 2016.
+
+\bibitem{b13} Schrittwieser, J., Antonoglou, I., Hubert, T. et al., ``Mastering Atari, Go, chess and shogi by planning with a learned model,'' Nature, Volume 588, 604–609, 2020.
+ 
+\bibitem{b14} Müller, M.,``Computer Go,''Artificial Intelligence,Volume 134, 145-179, 2002.
+
+\bibitem{b15} Van der Werf, E.C.D., ``AI techniques for the game of Go," PhD thesis, Universiteit Maastricht, The Netherlands, 2005.
+
+\bibitem{b16} H. Jaap van den Herik, Jos W. H. M. Uiterwijk \& Jack van Rijswijck, ``Games solved: Now and in the future,'' Artificial Intelligence, Volume 134, Issues 1–2, 2002.
+
+\bibitem{b17} Littman, M. L., ``Markov games as a framework for multi-agent reinforcement learning,'' In 11th International Conference on Machine Learning, 157–163, 1994.
+
+\bibitem{b18} Browne, C. et al., ``A survey of Monte-Carlo tree search methods,'' IEEE Transactions on Computational Intelligence and AI in Games, Volume 4, 1–43, 2012.
+
+\bibitem{b19} Krizhevsky, A., Sutskever, I. \& Hinton, G. E., ``ImageNet classification with deep convolutional neural networks.'' In Advances in Neural Information Processing Systems, 1097–1105, 2012. 
+
+\bibitem{b20}Lawrence, S., Giles, C. L., Tsoi, A. C. \& Back, A. D., ``Face recognition: a convolutional neural-network approach,'' IEEE Transactions on Neural Networks and Learning Systems, Volume 8, 98–113, 1997.
+
+\bibitem{b21} LeCun, Y., Bengio, Y. \& Hinton, G.E., ``Deep learning,'' Nature, Volume 521, 436–444, 2015.
+
+\bibitem{b22} LeCun, Y., Bottou, L., Bengio, Y., \& Haffner, P., ``Gradient based learning applied to document recognition,'' Proceedings of the IEEE 86(11): 2278-2324, 1998.
+
+\bibitem{b23} LeCun, Y. et al., ``Handwritten digit recognition with a back-propagation network," Advances in Neural Information Processing Systems, Volume 2, 1989.
+
+\bibitem{b24} Metropolis, N., ``The Beginning of the Monte Carlo method,'' Los Alamos Science, Special Issue, 1987.
+
+\bibitem{b25} Chaslot G., Bakkes S., Szita I., \& Spronck P., ``Monte-carlo tree search: a new framework for game AI,'' Artificial Intelligence and Interactive Digital Entertainment, AAAI Press, 216–217, 2008.
+
+\bibitem{b26} Gelly, S., \& Silver, D., ``Combining Online and Offline Knowledge in UCT,'' International Conference of Machine Learning, 2007.
+
+\bibitem{b27} Rosin, C.D., ``Multi-armed bandits with episode context,'' Annals of Mathematics and Artificial Intelligence, Volume 61, 203–230 2011.
+
+\bibitem{b28} Segal, R. B., ``On the scalability of parallel UCT,'' Computers and Games, 36–47, 2011.
+
+\bibitem{b29} Baudiš, P. \& Gailly, J.-L., ``Pachi: State of the art open source Go program,'' Advances in Computer Games, 24–38, Springer 2012.
+
+\bibitem{b30} Müller, M., Enzenberger, M., Arneson, B. \& Segal, R., ``Fuego – an open-source framework for board games and Go engine based on Monte-Carlo tree search,''
+IEEE Transactions on Computational Intelligence and AI in Games, Volume 2, 259–270, 2010.
+
+\bibitem{b31} Coulom, R., ``Computing Elo ratings of move patterns in the game of Go,'' International Computer Games Association Journal, Volume 30, 198–208, 2007.
+
+\bibitem{b32} Maddison, C. J., Huang, A., Sutskever, I. \& Silver, D., ``Move evaluation in Go using deep convolutional neural networks,'' 3rd International Conference on Learning
+Representations, 2015.
+
+\bibitem{b33} Clark, C. \& Storkey, A. J., ``Training deep convolutional neural networks to play go,'' International Conference on Machine Learning, 1766–1774, 2015.
+
+\bibitem{b34} Coulom, R., ``Whole-history rating: a Bayesian rating system for players of time-varying strength,'' International Conference on Computers and Games, 2008.
+
+\bibitem{b35} Silver, D., Schrittwieser, J., Simonyan, K. et al., ``Mastering the game of Go without human knowledge,'' Nature, Volume 550, 354–359, 2017.
+
+\bibitem{b36} Silver D., Hubert T., Schrittwieser, J. et al., ``A general reinforcement learning algorithm that masters chess, shogi, and Go through self-play,'' Science, Volume 362, 1140-1144, 2018.
+
+\end{thebibliography}
+
+
+\end{document}
+

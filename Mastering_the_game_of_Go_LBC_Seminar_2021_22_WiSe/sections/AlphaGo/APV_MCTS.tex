@@ -1,0 +1,42 @@
+% So what did they achieve so far? The training is done and they have a policy network that tells us what moves are promising at a given board position, and a value network that tells us how good is a board position.
+The last task was to combine the offline knowledge of both networks with the online knowledge of APV-MCTS, like in\cite{b26}. Let us assume our search tree looks like the one in the \textit{selection} step (cf. Fig.~\ref{MCTS_1}). Each edge $(s, a)$ represents an action $a$ to transit from state $s$ to state $s'$. Each edge stores a set of statistics, $\{ P(s,a), W_v(s,a),$ $W_r(s,a), N_v(s,a), N_r(s,a), Q(s,a)\}$, where $P(s,a)$ is the prior probability, $W_v(s,a)$ and $W_r(s,a)$ are Monte Carlo estimates of total action value, accumulated over $N_v(s,a)$ and $N_r(s,a)$ leaf evaluations and rollout rewards respectively, and $Q(s,a)$ is the combined mean action value for that edge. The APV-MCTS follows the four basic steps outlined in Fig.~\ref{MCTS_1}.
+
+\subsubsection*{Selection} The purpose of this step is to prioritize moves for further simulations. At each time step $t$ of each simulation, starting from the root node, the game-tree is traversed until a leaf node is reached at time step L. At each of $t<L$, an action $a_t$ is selected from state $s_t$ such that,
+\begin{equation}\label{sel_leaf}
+    a_t = \arg\max_a( Q(s_t,a) + u(s_t,a)),
+\end{equation}
+ using a variant of PUCT algorithm\cite{b27, b28}. The bonus term $u(s,a) = c_{puct} P(s,a) \frac{\sqrt{\sum_b N_r(s,b)}}{1+N_r(s,a)}$ is proportional to the prior probability $P(s,a) = p_\sigma(a|s)$ ($p_\sigma$ is the SL policy network) and $c_{puct}$ (a constant that determines the level of exploration), and inversely to $1+N_r(s,a)$. Initially the traversal to the best leaf node prefers actions with high probability and low visit counts, but asymptotically prefers action with high action value, $Q(s,a)$, which is calculated from the backpropagation of the previously simulated game results. Using \eqref{sel_leaf}, the partial game tree is traversed (highlighted in black in Fig.~\ref{MCTS_1}a) to a leaf node $s_L$ at step length $L$, which maybe expanded.
+ 
+ Before we see how a leaf node may be expanded, it is better to see how it is evaluated and its results backpropagated to the root node. This essentially helps us understand which leaf nodes to focus on and expand further.
+
+\subsubsection*{Evaluation and Backup}
+The leaf node $s_L$ is added to the queue for evaluation $v_\theta(s_L)$ by the value network (unless previously evaluated). Next, at each time step $t \geq L$, a game is simulated from $s_L$ by sampling actions using the rollout policy $a_t \sim p_\pi(\cdot | s_t)$ (for both players) until the end of the game. 
+% It means finish playing a game using a policy and find out whether you win or loss. 
+When the game reaches a terminal state, the outcome $z_L = \pm r(s_T)$ is computed. 
+% So a final leaf evaluation $V(s_L)$ is calculated by combining the evaluation by the value network $v_\theta(s_L)$ with the outcome $z_L$ using a mixing parameter $\lambda$. 
+% So the leaf node $s_L$ is evaluated in two steps: first, by the value network $v_\theta(s_L)$; and second, by the outcome $z_L$ of a random rollout played out until terminal step $T$ using the fast rollout policy $p_\pi$; these evaluations are combined, using a mixing parameter $\lambda$ to get a final leaf evaluation $V(s_L)$.
+% \begin{equation}
+%     V(s_L) = (1 - \lambda)v_\theta(s_L) + \lambda z_L
+% \end{equation}
+% \subsubsection{Backup}
+Next, at each step $t \leq L$ of that simulation, the rollout statistics are updated as if it has lost $n_{vl}$ games (parameter used to discourage other threads in multi-machine simulation\cite{b28}), $N_r(s_t, a_t) := N_r(s_t, a_t) + n_{vl}$; $W_r(s_t, a_t) := W_r(s_t, a_t) - n_{vl}$. At the end of the simulation, the rollout statistics are updated in the first backward pass through each step $t \leq L$, replacing the virtual losses by the outcome, $N_r(s_t, a_t) := N_r(s_t, a_t) - n_{vl} + 1$; $W_r(s_t, a_t) := W_r(s_t, a_t) + n_{vl} + z_t$. Asynchronously, a separate backward pass is initiated when the evaluation of the leaf position $v_\theta(s_L)$ completes. The output $v_\theta(s_L)$ is used to update value statistics in a second backward pass through each step $t \leq L$, $N_v(s_t, a_t) := N_v(s_t, a_t) + 1$, $W_v(s_t, a_t) := W_v(s_t, a_t) + v_\theta(s_L)$. The overall evaluation of each state action is a weighted average of the Monte Carlo estimates, that mixes together the value network and rollout evaluations with a weighting parameter $\lambda$,
+\begin{equation}
+    Q(s,a) = (1 - \lambda)\frac{W_v(s,a)}{N_v(s,a)} + \lambda \frac{W_r(s,a)}{N_r(s,a)}.
+\end{equation}
+
+
+% At the end of simulation, the visit counts and action values of all traversed edges are updated. Each edge accumulates the visit count and mean action evaluation of all simulations passing through that edge
+% \begin{align}
+%     N(s,a) &= \sum_{i=1}^n1(s,a,i)\\
+%     Q(s,a) &= \frac{1}{N(s,a)} \sum_{i=1}^n1(s,a,i)V(s_L^i)
+% \end{align}
+% where $s_l^i$ is the leaf node from the $i^{th}$ simulation, and $1(s, a, i)$ indicates
+% whether an edge $(s, a)$ was traversed during the $i^{th}$ simulation. When a sufficiently large tree is traversed, the search is complete and the algorithm chooses the most visited move from the root position.
+
+\subsubsection*{Expansion}When the visit count exceeds a threshold, $N_r(s, a) > n_{thr}$, the successor state $s'$ is added to the search tree. The new node is initialized to $\{ N(s',a) = N_r(s', a) = 0,\ W(s',a) = W_r(s',a) = 0,\ P(s',a) = p_\tau(a|s')\}$, using a tree policy $p_\tau(a|s')$ (similar to the rollout policy but with more features, see Extended Table 4 in \cite{b12}) to provide a placeholder prior probability. The position $s'$ is also inserted into a queue for asynchronous evaluation by the SL policy network. Prior probabilities are computed by the SL policy network $p_\sigma(\cdot |s')$ and these replace the placeholder prior probabilities, $P(s',a) := p_\sigma^\beta(a |s')$ (with a softmax temperature parameter set to $\beta$). You may ask why not use the RL policy network. Humans select a diverse beam of promising moves which is represented by the SL policy network $p_\sigma$. Hence, it performed better than the strongest RL policy network $p_\rho$ because RL optimizes for the single best move. At the end when the computational budget is reached, a sufficiently large tree-search is complete, and the algorithm chooses the most visited edge at the root node as the final move to play.
+
+% Positions are
+% evaluated by both the policy network and the value network using a mini-batch
+% size of 1 to minimize end-to-end evaluation time
+
+% The leaf node $s_L$ from the previous step is expanded for possible legal moves (here two in Fig.~\ref{MCTS_1}b). We initialize these new edges with $P(s,a) = p_\sigma(a|s),\ N(s,a) = 0,\ Q(s,a) = 0$. You may ask why it is not initiated by the RL policy network. Humans select a diverse beam of promising moves which is represented by the SL policy network $p_\sigma$. Hence, it performed better than the stronger RL policy network $p_\rho$ because RL optimizes for the single best move.
