@@ -36,11 +36,7 @@ Assigned Paper:
 3. **Keywords**: Deep Reinforcement Learning
 4. **Link**: https://www.nature.com/articles/nature16961.pdf
 5. **Supervisor**: Friedrich Solowjow
-6. **Synopsis**: This paper is about the famous DeepMind work on mastering Go On
-this paper we want to focus on the general idea of RL in combination with
-presenting the difficulties of the use case problem and some student chosen details
-We expect that the student to present the problem, the high level idea, and
-some in depth details
+6. **Synopsis**: This paper is about the famous DeepMind work on mastering Go. In this paper we want to focus on the general idea of RL in combination with presenting the difficulties of the use case problem and some student chosen details. We expect that the student to present the problem, the high level idea, and some in depth details.
 
 Contents of the repo:
 1. **LaTeX pdf of my review paper.**
