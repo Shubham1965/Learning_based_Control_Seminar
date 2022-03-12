@@ -1,6 +1,6 @@
 # Learning-based Control Seminar 2021-22 WiSe (RWTH Aachen, Germany)
 
-This repository is only for referring to my work for the Seminar Course named "Learning-based Control" held at RWTH Aachen pffered by DSME RWTH Institute headed by Prof. Trimpe.
+This repository is only for referring to my work for the Seminar Course named "Learning-based Control" held at RWTH Aachen offered by DSME RWTH Institute headed by Prof. Trimpe.
 
 The use of machine learning and artificial intelligence has huge potential for building future engineering systems. 
 Learning-based control is a recent and very active area of research that addresses these challenges, and broadly denotes the intersection of the
