@@ -1,3 +1,5 @@
+# Learning_based_Control_Seminar
+
 This repository is only for referring to my work for the Seminar Course named "Learning-based Control" held at RWTH Aachen pffered by DSME RWTH Institute headed by Prof. Trimpe.
 
 The use of machine learning and artificial intelligence has huge potential for building future engineering systems. 
